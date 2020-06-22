@@ -98,7 +98,24 @@ public class FoodController {
     @FXML
     void doSimula(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Simulazione...");
+    	
+    	try {
+    		Integer n = Integer.valueOf(this.txtK.getText());
+    		Food f = this.boxFood.getValue();
+    		
+    		if(n<=10 && n>0) {
+    			this.model.simula(n, f);
+    			this.txtResult.appendText("Numero di cibi preparati: "+model.nCibi()+" in "+model.minuti()+" minuti\n");
+    			
+    		}else {
+    			this.txtResult.appendText("Inserisci valore compreso tra 1 e 10");
+    		}
+    		
+    	}catch(NumberFormatException nfe) {
+    		this.txtResult.appendText("Inserisci valore corretto");
+    	}
+    	
+    	
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete

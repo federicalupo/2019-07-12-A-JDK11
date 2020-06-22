@@ -18,6 +18,7 @@ public class Model {
 	private Graph<Food, DefaultWeightedEdge> grafo;
 	private Map<Integer, Food> idMap; //metto solo vertici
 	private List<Food> vertici;
+	private Simulatore simulatore;
 	
 	public Model() {
 		dao = new FoodDao();
@@ -60,8 +61,21 @@ public class Model {
 		return grafo.edgeSet().size();
 	}
 	
+	public void simula(Integer k, Food f) {
+		simulatore = new Simulatore();
+		simulatore.init(grafo, this, k, f);
+		simulatore.run();
+	}
 	
+	public Integer nCibi() {
+		return simulatore.getnCibi();
+		
+	}
 	
+	public Double minuti() {
+		return simulatore.getTempo();
+		
+	}
 	
 
 }
