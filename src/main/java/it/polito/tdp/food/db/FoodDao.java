@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import it.polito.tdp.food.model.Arco;
 import it.polito.tdp.food.model.Condiment;
 import it.polito.tdp.food.model.Food;
 import it.polito.tdp.food.model.Portion;
@@ -108,5 +110,74 @@ public class FoodDao {
 			return null ;
 		}
 
+	}
+	
+	public List<Food> listaVertici(Integer n, Map<Integer, Food> idMap){
+		String sql = "select food.`food_code`, food.`display_name` " + 
+				"from portion, food " + 
+				"where portion.`food_code` = food.`food_code` " + 
+				"group by food_code " + 
+				"having count(*) <=? " + 
+				"order by display_name asc";
+		
+		List<Food> cibi = new ArrayList<>();
+		
+		try {
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			st.setInt(1, n);
+			
+			ResultSet res = st.executeQuery() ;
+			
+			while(res.next()) {
+					Food f = new Food(res.getInt("food_code"),
+							res.getString("display_name")
+							);
+				
+					cibi.add(f);
+					idMap.put(f.getFood_code(), f);	
+			}
+			
+			conn.close();
+			return cibi ;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null ;
+		}
+	}
+	
+	public List<Arco> listaArchi(Map<Integer, Food> idMap){
+		String sql="select f1.`food_code` as f1, f2.`food_code` as f2, avg(`condiment_calories`) as avg " + 
+				"from food_condiment as f1, food_condiment as f2, condiment c " + 
+				"where f1.`condiment_code` = f2.`condiment_code` " + 
+				"and f1.`food_code`< f2.`food_code` " + 
+				"and f1.`condiment_code`=c.`condiment_code` " + 
+				"group by f1.`food_code`, f2.`food_code`";
+		List<Arco> archi = new ArrayList<>();
+		
+		try {
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			
+			ResultSet res = st.executeQuery() ;
+			
+			while(res.next()) {
+				Food f1 = idMap.get(res.getInt("f1"));
+				Food f2 = idMap.get(res.getInt("f2"));
+				
+				if(f1!=null && f2!=null) { //esistono vertici
+					archi.add(new Arco(f1, f2, res.getDouble("avg")));
+				}
+						
+			}
+			
+			conn.close();
+			return archi ;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null ;
+		}
 	}
 }

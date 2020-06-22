@@ -5,8 +5,11 @@
 package it.polito.tdp.food;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.food.model.Arco;
+import it.polito.tdp.food.model.Food;
 import it.polito.tdp.food.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -41,7 +44,7 @@ public class FoodController {
     private Button btnSimula; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxFood"
-    private ComboBox<?> boxFood; // Value injected by FXMLLoader
+    private ComboBox<Food> boxFood; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtResult"
     private TextArea txtResult; // Value injected by FXMLLoader
@@ -49,13 +52,47 @@ public class FoodController {
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Creazione grafo...");
+    	
+    	try {
+    		Integer n = Integer.valueOf(this.txtPorzioni.getText());
+    		this.model.creaGrafo(n);
+    		
+    		this.txtResult.appendText("Creato grafo!\n");
+    		this.txtResult.appendText("#vertici: "+this.model.vertici().size()+"\n#archi: "+model.nArchi());
+    		
+    		this.boxFood.getItems().clear(); //!!! pulire
+    		this.boxFood.getItems().addAll(model.vertici());
+    		this.boxFood.setValue(model.vertici().get(0));
+    		
+    	}catch(NumberFormatException nfe) {
+    		this.txtResult.appendText("Inserisci valore corretto");
+    	}
+    	
+    	
     }
     
     @FXML
     void doCalorie(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Analisi calorie...");
+    	
+    	Food f= this.boxFood.getValue();
+    	List<Arco> calorieC = model.calorieCongiunte(f);
+    	
+    	if(calorieC.size()>0) {
+    	
+	    	this.txtResult.appendText("Elenco 5 cibi adiacenti a - "+f+ " -  aventi calorie congiunte max:\n");
+	    	
+	    	
+	    	for(int i=0; i<5 && i<calorieC.size(); i++) { //non è detto ce ne siano 5
+	    		Arco a = calorieC.get(i);
+	    		this.txtResult.appendText(a.getF2()+"   "+a.getPeso()+"\n");
+	   
+	    	}
+    	}else {
+    		this.txtResult.appendText("Nessun cibo adiacente trovato");
+    		
+    	}
+    	
     }
 
     @FXML
